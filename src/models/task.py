@@ -1,4 +1,5 @@
 """Task model for security scanning tasks."""
+
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
@@ -29,7 +30,7 @@ class Task:
     task_id: str
     job_id: str
     target_id: str
-    task_type: str
+    task_type: TaskType
     priority: str
     status: TaskStatus
     created_at: str
@@ -37,36 +38,36 @@ class Task:
     completed_at: Optional[str] = None
     result_id: Optional[str] = None
     error: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert task to dictionary."""
         return {
-            'task_id': self.task_id,
-            'job_id': self.job_id,
-            'target_id': self.target_id,
-            'task_type': self.task_type,
-            'priority': self.priority,
-            'status': self.status.value if isinstance(self.status, TaskStatus) else self.status,
-            'created_at': self.created_at,
-            'started_at': self.started_at,
-            'completed_at': self.completed_at,
-            'result_id': self.result_id,
-            'error': self.error
+            "task_id": self.task_id,
+            "job_id": self.job_id,
+            "target_id": self.target_id,
+            "task_type": self.task_type.value if isinstance(self.task_type, TaskType) else self.task_type,
+            "priority": self.priority,
+            "status": self.status.value if isinstance(self.status, TaskStatus) else self.status,
+            "created_at": self.created_at,
+            "started_at": self.started_at,
+            "completed_at": self.completed_at,
+            "result_id": self.result_id,
+            "error": self.error,
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Task':
+    def from_dict(cls, data: Dict[str, Any]) -> "Task":
         """Create task from dictionary."""
         return cls(
-            task_id=data['task_id'],
-            job_id=data['job_id'],
-            target_id=data['target_id'],
-            task_type=data['task_type'],
-            priority=data['priority'],
-            status=TaskStatus(data['status']),
-            created_at=data['created_at'],
-            started_at=data.get('started_at'),
-            completed_at=data.get('completed_at'),
-            result_id=data.get('result_id'),
-            error=data.get('error')
+            task_id=data.get("task_id", ""),
+            job_id=data.get("job_id", ""),
+            target_id=data.get("target_id", ""),
+            task_type=TaskType(data.get("task_type", "crawler")),
+            priority=data.get("priority", "medium"),
+            status=TaskStatus(data.get("status", "queued")),
+            created_at=data.get("created_at", ""),
+            started_at=data.get("started_at"),
+            completed_at=data.get("completed_at"),
+            result_id=data.get("result_id"),
+            error=data.get("error"),
         )
