@@ -46,7 +46,7 @@ function loadStatistics() {
         criticalVulns: Number(localStorage.getItem("criticalVulns")) || 0
     };
 
-    // ⭐ Prevent null errors
+    //  Prevent null errors
     document.getElementById("totalJobs")?.textContent = stats.totalJobs;
     document.getElementById("activeJobs")?.textContent = stats.activeJobs;
     document.getElementById("totalVulnerabilities")?.textContent = stats.totalVulnerabilities;
@@ -57,7 +57,7 @@ async function loadCurrentJob(jobId) {
     const section = document.getElementById("currentJobSection");
     const statusDiv = document.getElementById("currentJobStatus");
 
-    if (!section || !statusDiv) return; // ⭐ safety check
+    if (!section || !statusDiv) return; //  safety check
 
     section.classList.remove("hidden");
     section.style.display = "block";
@@ -116,7 +116,7 @@ function loadRecentJobs() {
     try {
         allJobs = JSON.parse(localStorage.getItem("recentJobs") || "[]");
     } catch {
-        allJobs = []; // ⭐ prevent crash if JSON corrupted
+        allJobs = []; //  prevent crash if JSON corrupted
     }
 
     if (jobsLoading) jobsLoading.style.display = "none";
@@ -147,7 +147,7 @@ function renderJobs(jobsData) {
     const jobsEmpty = document.getElementById("jobsEmpty");
     const tbody = document.getElementById("jobsTableBody");
 
-    if (!jobsTable || !jobsEmpty || !tbody) return; // ⭐ safety
+    if (!jobsTable || !jobsEmpty || !tbody) return; //  safety
 
     if (!jobsData.length) {
         jobsEmpty.style.display = "block";
