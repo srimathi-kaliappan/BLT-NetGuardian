@@ -1,67 +1,81 @@
 /**
  * Configuration for BLT-NetGuardian
  */
-
 const CONFIG = {
-    // Frontend and API are served from the same Cloudflare Worker, so use the
-    // current page origin. For local development with `wrangler dev` this will
-    // automatically resolve to http://localhost:8787.
-    API_BASE_URL: (typeof window !== 'undefined' ? window.location.origin : ''),
-    
+    // Frontend and API are served from the same Cloudflare Worker
+    API_BASE_URL: (typeof window !== "undefined" && window.location)
+        ? window.location.origin
+        : "",
+
     // API endpoints
     ENDPOINTS: {
-        QUEUE_TASKS: '/api/tasks/queue',
-        REGISTER_TARGET: '/api/targets/register',
-        INGEST_RESULTS: '/api/results/ingest',
-        JOB_STATUS: '/api/jobs/status',
-        LIST_TASKS: '/api/tasks/list',
-        VULNERABILITIES: '/api/vulnerabilities'
+        QUEUE_TASKS: "/api/tasks/queue",
+        REGISTER_TARGET: "/api/targets/register",
+        INGEST_RESULTS: "/api/results/ingest",
+        JOB_STATUS: "/api/jobs/status",
+        LIST_TASKS: "/api/tasks/list",
+        VULNERABILITIES: "/api/vulnerabilities"
     },
-    
+
     // Request timeout (ms)
     REQUEST_TIMEOUT: 30000
 };
 
-// Helper function to build full API URL
+/**
+ * Build full API URL
+ */
 function buildApiUrl(endpoint) {
-    return CONFIG.API_BASE_URL + endpoint;
+    return `${CONFIG.API_BASE_URL}${endpoint}`;
 }
 
-// Helper function to make API requests with error handling
+/**
+ * Make API request with timeout + error handling
+ */
 async function apiRequest(endpoint, options = {}) {
     const url = buildApiUrl(endpoint);
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    };
-    
-    const finalOptions = { ...defaultOptions, ...options };
-    
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT);
+
     try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT);
-        
         const response = await fetch(url, {
-            ...finalOptions,
+            method: options.method || "GET",
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            },
+            body: options.body ? JSON.stringify(options.body) : undefined,
             signal: controller.signal
         });
-        
+
         clearTimeout(timeout);
-        
+
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({
-                error: 'Request failed',
-                message: `HTTP ${response.status}: ${response.statusText}`
-            }));
-            throw new Error(errorData.message || errorData.error || 'Request failed');
+            let errorData = {};
+            try {
+                errorData = await response.json();
+            } catch {
+                errorData = {
+                    error: "Request failed",
+                    message: `HTTP ${response.status}: ${response.statusText}`
+                };
+            }
+
+            throw new Error(
+                errorData.message || errorData.error || "Request failed"
+            );
         }
-        
+
         return await response.json();
     } catch (error) {
-        if (error.name === 'AbortError') {
-            throw new Error('Request timeout - please try again');
+        if (error.name === "AbortError") {
+            throw new Error("Request timeout - please try again");
         }
         throw error;
     }
 }
+// Example usage
+await apiRequest(CONFIG.ENDPOINTS.QUEUE_TASKS, {
+    method: "POST",
+    body: { task: "scan" }
+});
