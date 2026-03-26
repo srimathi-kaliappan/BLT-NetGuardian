@@ -1,1 +1,1 @@
-"""Data models for BLT-NetGuardian."""
+"""Data models used in the BLT-NetGuardian application."""
